@@ -10,8 +10,12 @@
     <p>Now  you can ask question, related to your pdf files, feel free to ask.</p>
 <br><br><br>
 <p><b>Write your question</b></p><br>
-<input type="text">
+<form action="{{ url_for('/ques_ans') }}" method="post">
+<input type="text" name="ques">
 <button type="submit">Get Answer</button>
-
+<br><br>
+<h2>Your answer is:</h2>
+<p>{{ answer }}</p>
+</form>
 </body>
 </html>

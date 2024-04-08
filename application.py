@@ -48,6 +48,15 @@ def get_vector_db(chunks,embedding):
     vectorstore.save_local(vector_db_name)
     return vectorstore
 
+def get_memory():
+    memory1 = ConversationBufferMemory(return_messages=True, memory_key="chat_history")
+    return memory1
+
+def get_llm():
+    api_key = os.getenv('GOOGLE_API_KEY')
+    llm = GooglePalm(google_api_key=api_key,temparature=0.2)
+    return llm
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -73,6 +82,25 @@ def upload():
         return render_template('question_answering.html')
     return "Error: No file selected or invalid request method."
 
+
+@app.route('/ques_ans',methods=['GET','POST'])
+def ques_ans():
+    if request.method =='POST':
+        ques = str(request.form['ques'])
+        instructor_embeddings = get_embedding()
+        llm = get_llm()
+        memory = get_memory()
+
+        vector_store = FAISS.load_local('faiss_index', instructor_embeddings)
+        chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vector_store.as_retriever(),
+        memory=memory
+        )
+
+        llm_response = chain.invoke({'question':ques})
+        answer = str(llm_response['answer'])
+        return render_template('question_answering.html',answer=answer)
 
 
 if __name__ == "__main__":
