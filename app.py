@@ -28,6 +28,8 @@ def get_chunks(text):
     )
     chunks = text_splitter.split_text(text=text)
     return chunks
+
+    
 def get_embedding():
     embedding = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large")
     return embedding
