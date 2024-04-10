@@ -1,3 +1,4 @@
+# streamlit base app
 import streamlit as st 
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
@@ -5,7 +6,8 @@ from langchain.vectorstores.faiss import FAISS
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.llms import GooglePalm
-from langchain.embeddings import HuggingFaceInstructEmbeddings
+# from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain_community.embeddings import HuggingFaceInstructEmbeddings
 import os,time
 from dotenv import load_dotenv
 load_dotenv()

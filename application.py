@@ -1,3 +1,4 @@
+#flask based app
 from flask import Flask, render_template, request, send_from_directory
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
@@ -6,6 +7,8 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.llms import GooglePalm
 from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings import HuggingFaceInstructEmbeddings
+from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 import os,time
 from dotenv import load_dotenv
 load_dotenv()
@@ -70,14 +73,28 @@ def upload():
                 file_path = os.path.join(PDF_DIRECTORY, uploaded_file.filename)
                 uploaded_file.save(file_path)
         
-        # Reading text from the pdf files
-        text = extract_text(PDF_DIRECTORY=PDF_DIRECTORY)
-        #get chunks
-        chunks = get_chunks(text=text)
-        embedding = get_embedding()
 
-        # intialized the text into FAISS vectorDB 
-        vector_db = get_vector_db(chunks=chunks,embedding=embedding)
+
+        with ThreadPoolExecutor() as executor:
+            text = executor.submit(extract_text,PDF_DIRECTORY)
+            text = text.result()
+
+            chunks = executor.submit(get_chunks,text)
+            chunks = chunks.result()
+
+            embedding = get_embedding()
+
+            vector_db = executor.submit(get_vector_db,chunks,embedding).result()
+
+
+        # # Reading text from the pdf files
+        # text = extract_text(PDF_DIRECTORY=PDF_DIRECTORY)
+        # #get chunks
+        # chunks = get_chunks(text=text)
+        # embedding = get_embedding()
+
+        # # intialized the text into FAISS vectorDB 
+        # vector_db = get_vector_db(chunks=chunks,embedding=embedding)
 
         return render_template('question_answering.html')
     return "Error: No file selected or invalid request method."
